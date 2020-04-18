@@ -1,0 +1,15 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- Extracted on BlueZ v5.50 -->
+
+<node>
+   <interface name="org.bluez.ProfileManager1">
+      <method name="RegisterProfile">
+         <arg direction="in" name="profile" type="o"/>
+         <arg direction="in" name="UUID" type="s"/>
+         <arg direction="in" name="options" type="a{sv}"/>
+      </method>
+      <method name="UnregisterProfile">
+         <arg direction="in" name="profile" type="o"/>
+      </method>
+   </interface>
+</node>

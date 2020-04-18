@@ -1,0 +1,31 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- Extracted on BlueZ v5.50 -->
+
+<node>
+   <interface name="org.bluez.Adapter1">
+      <method name="StartDiscovery"/>
+      <method name="SetDiscoveryFilter">
+         <arg direction="in" name="properties" type="a{sv}"/>
+      </method>
+      <method name="StopDiscovery"/>
+      <method name="RemoveDevice">
+         <arg direction="in" name="device" type="o"/>
+      </method>
+      <method name="GetDiscoveryFilters">
+         <arg direction="out" name="filters" type="as"/>
+      </method>
+      <property access="read" name="Address" type="s"/>
+      <property access="read" name="AddressType" type="s"/>
+      <property access="read" name="Name" type="s"/>
+      <property access="readwrite" name="Alias" type="s"/>
+      <property access="read" name="Class" type="u"/>
+      <property access="readwrite" name="Powered" type="b"/>
+      <property access="readwrite" name="Discoverable" type="b"/>
+      <property access="readwrite" name="DiscoverableTimeout" type="u"/>
+      <property access="readwrite" name="Pairable" type="b"/>
+      <property access="readwrite" name="PairableTimeout" type="u"/>
+      <property access="read" name="Discovering" type="b"/>
+      <property access="read" name="UUIDs" type="as"/>
+      <property access="read" name="Modalias" type="s"/>
+   </interface>
+</node>
