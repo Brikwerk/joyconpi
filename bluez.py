@@ -8,7 +8,9 @@ class BlueZ():
     """
 
     SERVICE_NAME = "org.bluez"
+    BLUEZ_OBJECT_PATH = "/org/bluez"
     ADAPTER_INTERFACE = SERVICE_NAME + ".Adapter1"
+    PROFILEMANAGER_INTERFACE = SERVICE_NAME + ".ProfileManager1"
 
     def __init__ (self, device_id="hci0"):
         self.bus = dbus.SystemBus()
@@ -24,7 +26,7 @@ class BlueZ():
                 adapter_error += f" with a device ID of {device_id}"
             raise Exception(adapter_error)
         
-        # Load the adapter's interface for later use
+        # Load the adapter's interface
         print(f"Using adapter under object path: {adapter_path}")
         self.adapter = dbus.Interface(self.bus.get_object(self.SERVICE_NAME, adapter_path),
             "org.freedesktop.DBus.Properties")
@@ -33,6 +35,11 @@ class BlueZ():
             self.device_id = device_id
         else:
             self.device_id = adapter_path.split("/")[-1]
+
+        # Load the ProfileManager interface
+        self.profile_manager = dbus.Interface(self.bus.get_object(
+            self.SERVICE_NAME, self.BLUEZ_OBJECT_PATH), 
+            self.PROFILEMANAGER_INTERFACE)
     
 
     def find_object_path(self, service_name, interface_name, object_name=None):
@@ -189,6 +196,32 @@ class BlueZ():
 
 
     @property
+    def discoverable_timeout(self):
+        """Gets the timeout time (in seconds) for how long the adapter
+        should remain as discoverable. Defaults to 180 (3 minutes).
+
+        :return: The discoverable timeout in seconds
+        :rtype: int
+        """
+
+        return self.adapter.Get(self.ADAPTER_INTERFACE, "DiscoverableTimeout")
+
+    
+    def set_discoverable_timeout(self, value):
+        """Sets the discoverable time (in seconds) for the discoverable 
+        property. Setting this property to 0 results in an infinite
+        discoverable timeout.
+
+        :param value: The discoverable timeout value in seconds
+        :type value: int
+        """
+
+        dbus_value = dbus.UInt32(value)
+        self.adapter.Set(self.ADAPTER_INTERFACE, 
+            "DiscoverableTimeout", dbus_value)
+
+
+    @property
     def device_class(self):
         """Gets the Bluetooth class of the device. This represents what type
         of device this reporting as (Ex: Gamepad, Headphones, etc).
@@ -203,7 +236,7 @@ class BlueZ():
         # setter for further justification on using hciconfig.
         result = subprocess.run(["hciconfig", self.device_id, "class"],
             stdout=subprocess.PIPE)
-        device_class = str(result.stdout).split("Class: ")[1][0:8]
+        device_class = result.stdout.decode("utf-8").split("Class: ")[1][0:8]
 
         return device_class
 
@@ -211,16 +244,24 @@ class BlueZ():
     def set_device_class(self, device_class):
         """Sets the Bluetooth class of the device. This represents what type
         of device this reporting as (Ex: Gamepad, Headphones, etc).
+        Note: To work this function *MUST* be run as the super user. An
+        exception is returned if this function is run without elevation.
 
         :param device_class: A 32-bit Hexadecimal integer
         :type device_class: string
+        :raises Exception: On inability to set class
         """
 
         # This is a bit of a hack. BlueZ allows you to set this value, however,
         # a config file needs to filled and the BT daemon restarted. This is a
         # good compromise but requires super user privileges. Not ideal.
         result = subprocess.run(["hciconfig", self.device_id, 
-            "class", device_class])
+            "class", device_class], stderr=subprocess.PIPE)
+        
+        # Checking if there was a problem setting the device class
+        cmd_err = result.stderr.decode("utf-8").replace("\n", "")
+        if cmd_err != "":
+            raise Exception(cmd_err)
 
 
     @property
@@ -243,3 +284,37 @@ class BlueZ():
 
         dbus_value = dbus.Boolean(value)
         self.adapter.Set(self.ADAPTER_INTERFACE, "Powered", dbus_value)
+
+
+    def register_profile(self, profile_path, uuid, opts):
+        """Registers an SDP record on the BlueZ SDP server.
+
+        Options (non-exhaustive, refer to BlueZ docs for
+        the complete list):
+
+        - Name: Human readable name of the profile
+
+        - Role: Specifies precise local role. Either "client"
+        or "servier".
+
+        - RequireAuthentication: A boolean value indicating if
+        pairing is required before connection.
+
+        - RequireAuthorization: A boolean value indiciating if
+        authorization is needed before connection.
+
+        - AutoConnect: A boolean value indicating whether a
+        connection can be forced if a client UUID is present.
+
+        - ServiceRecord: An XML SDP record as a string.
+
+        :param profile_path: The path for the SDP record
+        :type profile_path: string
+        :param uuid: The UUID for the SDP record
+        :type uuid: string
+        :param opts: The options for the SDP server
+        :type opts: dict
+        """
+        
+        self.profile_manager.RegisterProfile(profile_path, uuid, opts)
+        

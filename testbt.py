@@ -22,11 +22,21 @@ bt.set_discoverable(False)
 print("Discoverable", bt.discoverable)
 
 print("")
-print("Device Class", bt.device_class)
-bt.set_device_class("0x002058")
-print("Device Class", bt.device_class)
-bt.set_device_class("0x480000")
-print("Device Class", bt.device_class)
+print("Discoverable Timeout", bt.discoverable_timeout)
+bt.set_discoverable_timeout(0)
+print("Discoverable Timeout", bt.discoverable_timeout)
+bt.set_discoverable_timeout(180)
+print("Discoverable Timeout", bt.discoverable_timeout)
+
+try:
+    print("")
+    print("Device Class", bt.device_class)
+    bt.set_device_class("0x002058")
+    print("Device Class", bt.device_class)
+    bt.set_device_class("0x480000")
+    print("Device Class", bt.device_class)
+except Exception as e:
+    print(e)
 
 print("")
 print("Powered", bt.powered)
