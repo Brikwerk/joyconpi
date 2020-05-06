@@ -3,7 +3,7 @@ import os
 
 class HIDGamepad():
 
-    GAMPAD_CLASS = "0x002508"
+    GAMEPAD_CLASS = "0x002508"
     SDP_UUID = "00001000-0000-1000-8000-00805f9b34fb"
     SDP_RECORD_PATH = "/joyconpi/controller"
 
@@ -28,6 +28,8 @@ class HIDGamepad():
             "AutoConnect": True
         }
         self.bt.register_profile(self.SDP_RECORD_PATH, self.SDP_UUID, opts)
+
+        self.bt.set_device_class(self.GAMEPAD_CLASS)
 
 
     def load_sdp_record(self, path):
