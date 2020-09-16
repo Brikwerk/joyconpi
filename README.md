@@ -4,7 +4,9 @@ An attempt at creating a Nintendo Switch Joy-Con emulator with a Raspberry Pi.
 
 ---
 
-**This code is currently not working.**
+### This project does not function and is not being developed
+
+## Please see [NXBT](https://github.com/Brikwerk/nxbt) for a working variant of this project
 
 This is likely due to incompatibilities with the Joy-Con's usage of Bluetooth 3.0's High Speed Connection. This might not be a surmountable issue.
 
