@@ -1,4 +1,1 @@
-wheel
-git+https://github.com/pybluez/pybluez.git@30060cd07f625a24e4f47fe122f0acea54108dc8
-dbus-python
-PyGObject
+dbus-python>=1.2.16
